@@ -1,11 +1,29 @@
 import {
   createModel,
-  type ErrorMessage,
   type KaldiRecognizer,
-  type Model,
-  type PartialResultMessage,
-  type ResultMessage,
+  type Model
 } from 'vosk-browser'
+
+type ResultMessage = {
+  event: "result"
+  recognizerId: string
+  result: {
+    text: string
+  }
+}
+
+type PartialResultMessage = {
+  event: "partialresult"
+  recognizerId: string
+  result: {
+    partial: string
+  }
+}
+
+type ErrorMessage = {
+  event: "error"
+  error: string
+}
 
 type WorkerCommand =
   | {
@@ -65,13 +83,16 @@ const resetModel = (): void => {
 }
 
 const bindRecognizerEvents = (nextRecognizer: KaldiRecognizer): void => {
-  nextRecognizer.on('partialresult', (payload: PartialResultMessage) => {
+  nextRecognizer.on('partialresult', (message) => {
+    const payload = message as PartialResultMessage;
+
     const partial = payload.result.partial.trim()
     lastPartial = partial
     sendMessage({ type: 'partial', text: partial })
   })
 
-  nextRecognizer.on('result', (payload: ResultMessage) => {
+  nextRecognizer.on('result', (message) => {
+    const payload = message as ResultMessage
     const text = payload.result.text.trim()
     if (text) {
       sendMessage({ type: 'final', text })
@@ -80,7 +101,8 @@ const bindRecognizerEvents = (nextRecognizer: KaldiRecognizer): void => {
     sendMessage({ type: 'partial', text: '' })
   })
 
-  nextRecognizer.on('error', (payload: ErrorMessage) => {
+  nextRecognizer.on('error', (message) => {
+    const payload = message as ErrorMessage
     sendMessage({ type: 'error', error: payload.error })
   })
 }
