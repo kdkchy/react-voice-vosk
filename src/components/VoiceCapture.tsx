@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition'
 
-const MODEL_URL = '/models/vosk-model-small-en-us-0.15.zip'
+const MODEL_URL = '/vosk/models/vosk-model-small-en-us-0.15.zip'
 
 export const VoiceCapture = () => {
   const {
